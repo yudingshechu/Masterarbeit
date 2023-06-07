@@ -40,90 +40,10 @@ NLExtract("001Adata/20170501.tif","001Adata/20170502.tif",uga_shape_3,"201705_ad
 NLExtract("001Adata/20170601.tif","001Adata/20170602.tif",uga_shape_3,"201706_adm3.csv")
 
 ##############################################################
-filepath <- "001Adata/20190901.tif"
-filepath2 <- "001Adata/20190902.tif"
-data <- raster(filepath) 
-data2 <- raster(filepath2) 
-
-uga_shape_3<- getData('GADM', country='uga', level=3)
-uga_shape_2<- getData('GADM', country='uga', level=2)
-# uga_shape_2<- getData('GADM', country='uga', level=2)
-
-plot(uga_shape_2) #to visualize the shapefile.
-uga_sf_3 <- as(uga_shape_3, "sf")
-uga_sf_2 <- as(uga_shape_2, "sf")
-
-nl_data_uganda_2 <- crop(data2, uga_sf_2)
-nl_data_uganda_1 <- crop(data, uga_sf_2)
-
-merged_raster <- merge(nl_data_uganda_1, nl_data_uganda_2)
-
-extract_ugadata2 <- raster::extract(merged_raster, uga_shape_2, fun=mean, df=TRUE, na.rm = TRUE)
-
-final_data2 <- cbind(st_drop_geometry(uga_sf_2), extract_ugadata2)
-
-write.csv(final_data2,file = "201909.csv",row.names = FALSE)
-
-########################################################################
-nl_data_uganda_2_3 <- crop(data2, uga_sf_3)
-nl_data_uganda_1_3 <- crop(data, uga_sf_3)
-merged_raster2 <- merge(nl_data_uganda_1_3, nl_data_uganda_2_3)
-
-extract_ugadata23 <- raster::extract(merged_raster2, uga_shape_3, fun=mean, df=TRUE, na.rm = TRUE)
-
-final_data23 <- cbind(st_drop_geometry(uga_sf_3), extract_ugadata23)
-
-write.csv(final_data23,file = "201909_3.csv",row.names = FALSE)
-########################################################################
-########################################################################
-# here use a new map data
-library(rgdal)
-uga_shape_2 <- readOGR(dsn = "uga_admbnda_ubos_20200824_shp",
-                   layer = "uga_admbnda_adm2_ubos_20200824")
-uga_shape_3 <- readOGR(dsn = "uga_admbnda_ubos_20200824_shp",
-                       layer = "uga_admbnda_adm3_ubos_20200824")
-
-plot(uga_shape_3)
-uga_sf_2 <- as(uga_shape_2, "sf")
-
-uga_sf_3 <- as(uga_shape_3, "sf")
-
-nl_data_uganda_2 <- crop(data2, uga_sf_2)
-nl_data_uganda_1 <- crop(data, uga_sf_2)
-
-merged_raster <- merge(nl_data_uganda_1, nl_data_uganda_2)
-
-extract_ugadata2 <- raster::extract(merged_raster, uga_shape_2, fun=mean, df=TRUE, na.rm = TRUE)
-
-final_data2 <- cbind(st_drop_geometry(uga_sf_2), extract_ugadata2)
-
-write.csv(final_data2,file = "201909_new.csv",row.names = FALSE)
-########################################################
-nl_data_uganda_2 <- crop(data2, uga_sf_3)
-nl_data_uganda_1 <- crop(data, uga_sf_3)
-
-extract_ugadata3 <- raster::extract(merged_raster, uga_shape_3, fun=mean, df=TRUE, na.rm = TRUE)
-
-final_data3 <- cbind(st_drop_geometry(uga_sf_3), extract_ugadata3)
-
-write.csv(final_data3,file = "201909_amd3.csv",row.names = FALSE)
-########################################################
-
-
-
-
-
-########################################################################
 uganda_shapefile_cropped <- crop(uga_shape_2, merged_raster)
 nl_data_df <- data.frame(lon = coordinates(uganda_shapefile_cropped)[, 1], 
                          lat = coordinates(uganda_shapefile_cropped)[, 2],
                          nl_mean = drop_na(extract_ugadata2))
-ggplot() +
-  geom_polygon(data = fortify(uganda_shapefile_cropped), 
-               aes(x = long, y = lat, group = group), fill = "gray",color="black") +
-  geom_point(data = nl_data_df, aes(x = lon, y = lat, color = nl_mean.layer), size = 3) +
-  scale_color_gradient(low = "yellow", high = "red") +
-  coord_equal() 
 
 plotdata = fortify(uganda_shapefile_cropped)
 plotdata$id = as.integer(plotdata$id)
