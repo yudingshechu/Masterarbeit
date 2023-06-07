@@ -1,4 +1,4 @@
-# Masterarbeit
+# Masterarbeit: Robust Statistical Learning for Food Security Forecasting
 Here are part of the code and current sample of my master thesis. This project/thesis will be finished with R and Python, using Uganda National Household Survey (UNHS) data and other open source data. 
 
 My master thesis focuses on finding a robust Machine Learning model to predict the food insecurity events when facing a shock, such as the breakout of Covid and the war in Ukraine. 
