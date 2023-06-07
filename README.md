@@ -15,7 +15,7 @@ Nightlight data is a good proxy for economic variables in developling countries.
 In addition, `GSEC1.dta` contains the household ID, their location information, the date of interview and some other basic information. 
 
 ## Conflict Data 
-Uganda conflict data from 2016 to 2020 are obtained from [Armed Conflict Location & Event Data Project (ACLED)](www.acleddata.com). The number of each type of conflict for a given district and date are generated as variables. 
+Uganda conflict data from 2016 to 2020 are obtained from [Armed Conflict Location & Event Data Project (ACLED)](www.acleddata.com). The number of each type of conflict for a given district and date are generated as variables. Meanwhile, the total fatalities in a given district and a given data is generated as a variable. 
 
 Reference: 
 _Raleigh, C., Linke, A., Hegre, H., & Karlsen, J. (2010). “Introducing ACLED: An armed conflict location and event dataset: Special data feature”. Journal of Peace Research, 47(5), 651-660. https://doi.org/10.1177/0022343310378914_
