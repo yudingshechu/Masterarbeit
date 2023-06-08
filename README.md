@@ -17,11 +17,11 @@ In addition, `GSEC1.dta` contains the household ID, their location information, 
 ## Conflict Data 
 Uganda conflict data from 2016 to 2020 are obtained from [Armed Conflict Location & Event Data Project (ACLED)](www.acleddata.com). The number of each type of conflict for a given district and date are generated as variables. Meanwhile, the total fatalities in a given district and a given data is generated as a variable. 
 
-## NDVI data
-NDVI (Normalized Difference Vegetation Index) is used as a predictor for food security in the ML context as well. This data is also provided by [VAM Food Security Analysis](https://dataviz.vam.wfp.org/seasonal_explorer/rainfall_vegetation/visualizations), for those districts without data, imputation of Uganda national scale data happens. 
-
 Reference: 
 _Raleigh, C., Linke, A., Hegre, H., & Karlsen, J. (2010). “Introducing ACLED: An armed conflict location and event dataset: Special data feature”. Journal of Peace Research, 47(5), 651-660. https://doi.org/10.1177/0022343310378914_
+
+## NDVI data
+NDVI (Normalized Difference Vegetation Index) is used as a predictor for food security in the ML context as well. This data is also provided by [VAM Food Security Analysis](https://dataviz.vam.wfp.org/seasonal_explorer/rainfall_vegetation/visualizations), for those districts without data, imputation of Uganda national scale data happens. 
 
 # Credits
 **Author:** _Gewei Cao, Msc Economics, University of Bonn_
