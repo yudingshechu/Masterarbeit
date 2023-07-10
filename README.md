@@ -24,6 +24,6 @@ _Raleigh, C., Linke, A., Hegre, H., & Karlsen, J. (2010). “Introducing ACLED: 
 NDVI (Normalized Difference Vegetation Index) is used as a predictor for food security in the ML context as well. This data is also provided by [VAM Food Security Analysis](https://dataviz.vam.wfp.org/seasonal_explorer/rainfall_vegetation/visualizations), for those districts without data, imputation of Uganda national scale data happens. 
 
 # Credits
-**Author:** _Gewei Cao, Msc Economics, University of Bonn_
+**Author:** _Gewei Cao, MSc Economics, University of Bonn_
 
-**Supervisior:** _Dr. Clara Brandi, University of Bonn, IDOS; Dr. Lukas Kornher, ZEF_ 
+**Supervisior:** _Dr. Clara Brandi, University of Bonn, IDOS; Dr. Lukas Kornher, University of Bonn, ZEF_ 
