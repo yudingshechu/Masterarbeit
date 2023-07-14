@@ -194,3 +194,78 @@ def variable_distribution_crosscheck(varname, dataframe):
     plt.ylabel('Conditional Class Ratio')
     plt.title('Scatter Plot of Conditional Class Ratio')
     plt.show()
+    
+def XGBmodelfitTime(alg, dtrain, predictors, X_test, Y_test,useTrainCV=True, cv_folds=5, early_stopping_rounds=50):
+    """Fit the XGBoost automatically and return the needed matrics and importance figure 
+    this function is a modified version of function in: 
+    https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/ 
+    !!! Important: the response variable name is FCSStaus !!!
+    
+    Args:
+        alg (xgboost): xgboost model
+        dtrain (dataframe): dataframe of training data (includes the response variable)
+        predictors (list): predictor list 
+        X_test (dataframe): X testing data 
+        Y_test (dataframe): Y testing data
+        useTrainCV (bool, optional): if use the CV to find the best n_estimator. Defaults to True.
+        cv_folds (int, optional): CV folds. Defaults to 5.
+        early_stopping_rounds (int, optional): for iteration. Defaults to 50. 
+        
+    Return: 
+        alg, accuracy, auc, recall 
+    """
+    if useTrainCV:
+        xgb_param = alg.get_xgb_params()
+        xgtrain = xgb.DMatrix(dtrain[predictors].values, label=dtrain["FCSStaus"].values)
+        cvresult = xgb.cv(xgb_param, xgtrain, num_boost_round=alg.get_params()['n_estimators'], nfold=cv_folds,
+            metrics='auc', early_stopping_rounds=early_stopping_rounds)
+        alg.set_params(n_estimators=cvresult.shape[0])
+    
+    #Fit the algorithm on the data
+    alg.fit(dtrain[predictors], dtrain['FCSStaus'])
+        
+    #Predict training set:
+    dtest_predprob_pre = alg.predict_proba(X_test[predictors])[:,1]
+    dtest_predictions_pre = alg.predict(X_test[predictors])
+
+    accuracy = metrics.accuracy_score(Y_test, dtest_predictions_pre)
+    auc = metrics.roc_auc_score(Y_test, dtest_predprob_pre)
+    recall = metrics.recall_score(Y_test, dtest_predictions_pre)
+
+    return alg, accuracy, auc, recall 
+
+def timeplot(xaxis,RF, xgb, LR, path, plotname): 
+    rfvar = np.std(RF).round(2)
+    xgbvar = np.std(xgb).round(2)
+    lrvar = np.std(LR).round(2)
+    plt.figure(figsize=(8,6))
+    plt.scatter(xaxis, RF, label = f"Random Forest, std ({rfvar})")
+    plt.scatter(xaxis, xgb, label = f"XGBoost, std ({xgbvar})", color ='brown', marker='x')
+    plt.scatter(xaxis, LR, label = f"Logistic Regression, std ({lrvar})", color ='green', marker='v')
+    rfmean = np.mean(RF).round(2)
+    xgbmean = np.mean(xgb).round(2)
+    lrmean = np.mean(LR).round(2)
+    plt.hlines(y = rfmean,xmin=xaxis[0], xmax=xaxis[-1] ,label=f"Random Forest, mean ({rfmean})",linestyle='--')
+    plt.hlines(y = xgbmean, xmin=xaxis[0], xmax=xaxis[-1],label=f"XGBoost, mean ({xgbmean})", linestyle='dotted',
+            color='brown')
+    plt.hlines(y = lrmean, xmin=xaxis[0], xmax=xaxis[-1],label=f"Logistic Regression, mean ({lrmean})", linestyle='--',
+            color='green')
+    index_start = xaxis.index('2020_2')
+    index_end = xaxis.index('2020_7')
+    # Calculate the middle index
+    middle_index = (index_start + index_end) // 2
+    # Add a vertical line at the middle index
+    plt.axvline(x=middle_index, color='red', linestyle='--', alpha = 0.5)
+    plt.ylim(0, 1)
+    # Rotate x-axis labels (optional)
+    plt.xticks(rotation=45)
+    # Add labels and title
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.title(plotname)
+    # Add a legend
+    plt.legend(loc = 'lower right')
+    plt.grid(which = "major", linewidth = 1)
+    plt.grid(which = "minor", linewidth = 0.3)
+    plt.minorticks_on()
+    plt.savefig(path)
