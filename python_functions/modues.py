@@ -10,7 +10,7 @@ from sklearn.metrics import recall_score
 import matplotlib.pyplot as plt
 from sklearn import metrics
 import xgboost as xgb # use xgb.cv 
-
+from datetime import datetime, timedelta
 
 
 def StandardizerTrainTest(X_train, X_test, standardizationList, binaryList, freqList, nonstdList):
@@ -234,22 +234,27 @@ def XGBmodelfitTime(alg, dtrain, predictors, X_test, Y_test,useTrainCV=True, cv_
 
     return alg, accuracy, auc, recall 
 
-def timeplot(xaxis,RF, xgb, LR, path, plotname): 
+def timeplot(xaxis,RF, xgb, LR, LR_resp, path, plotname): 
     rfvar = np.std(RF).round(2)
     xgbvar = np.std(xgb).round(2)
     lrvar = np.std(LR).round(2)
+    lrvarresp = np.std(LR_resp).round(2)
     plt.figure(figsize=(8,6))
-    plt.scatter(xaxis, RF, label = f"Random Forest, std ({rfvar})")
-    plt.scatter(xaxis, xgb, label = f"XGBoost, std ({xgbvar})", color ='brown', marker='x')
+    plt.scatter(xaxis, RF, label = f"Random Forest, std ({rfvar})", color ='blue')
+    plt.scatter(xaxis, xgb, label = f"XGBoost, std ({xgbvar})", color ='orange', marker='x')
     plt.scatter(xaxis, LR, label = f"Logistic Regression, std ({lrvar})", color ='green', marker='v')
+    plt.scatter(xaxis, LR_resp, label = f"Logistic Regression ADASYN, std ({lrvarresp})", color ='red', marker='v')
     rfmean = np.mean(RF).round(2)
     xgbmean = np.mean(xgb).round(2)
     lrmean = np.mean(LR).round(2)
+    lrmeanresp = np.mean(LR_resp).round(2)
     plt.hlines(y = rfmean,xmin=xaxis[0], xmax=xaxis[-1] ,label=f"Random Forest, mean ({rfmean})",linestyle='--')
     plt.hlines(y = xgbmean, xmin=xaxis[0], xmax=xaxis[-1],label=f"XGBoost, mean ({xgbmean})", linestyle='dotted',
-            color='brown')
+            color='orange')
     plt.hlines(y = lrmean, xmin=xaxis[0], xmax=xaxis[-1],label=f"Logistic Regression, mean ({lrmean})", linestyle='--',
             color='green')
+    plt.hlines(y = lrmeanresp, xmin=xaxis[0], xmax=xaxis[-1],label=f"Logistic Regression ADASYN, mean ({lrmeanresp})", linestyle='--',
+        color='red')
     index_start = xaxis.index('2020_2')
     index_end = xaxis.index('2020_7')
     # Calculate the middle index
@@ -264,6 +269,61 @@ def timeplot(xaxis,RF, xgb, LR, path, plotname):
     plt.ylabel('Value')
     plt.title(plotname)
     # Add a legend
+    plt.legend(loc = 'lower right')
+    plt.grid(which = "major", linewidth = 1)
+    plt.grid(which = "minor", linewidth = 0.3)
+    plt.minorticks_on()
+    plt.savefig(path)
+    
+def tplot(xaxis,RF, xgb, LR, LR_ADA, alpha, bootLR, bootRF, bootXGB, bootLRADA, path): 
+    dates = xaxis
+    formatted_dates0 = []
+    formatted_dates1 = []
+    formatted_dates = []
+    formatted_dates2 = []
+    for date_str in dates:
+        year, month = date_str.split('_')
+        date0 = datetime(int(year), int(month), 1)
+        date1 = datetime(int(year), int(month), 1)+ timedelta(days=5)
+        date = datetime(int(year), int(month), 1) + timedelta(days=10)
+        date2 = datetime(int(year), int(month), 1) + timedelta(days=15)
+        formatted_dates0.append(date0)
+        formatted_dates1.append(date1)
+        formatted_dates.append(date)
+        formatted_dates2.append(date2)
+    plotdata = {}
+    RF1 = np.array(RF)
+    xgb1 = np.array(xgb)
+    LR1 = np.array(LR)
+    LRADA1 = np.array(LR_ADA)
+    for data, name in zip([bootLR, bootRF, bootXGB, bootLRADA], ['LR','RF','XGB', 'LRADA']): 
+        upperList = []
+        lowerList = []
+        for i in data.keys():
+                stats = data[i]
+                p = ((1.0-alpha)/2.0) * 100
+                lower = np.percentile(stats, p)
+                p = (alpha+((1.0-alpha)/2.0)) * 100
+                upper = np.percentile(stats, p)
+                upperList.append(upper)
+                lowerList.append(lower)
+        plotdata[f"{name}_upper"] = np.array(upperList)
+        plotdata[f"{name}_lower"] = np.array(lowerList)
+    plt.figure(figsize=(8,6))
+
+    plt.errorbar(formatted_dates0,RF1, yerr=np.array([np.abs(RF1 - plotdata['RF_upper']), RF1 - plotdata['RF_lower'] ]), 
+                 color ='blue',linestyle='none', marker='o', label = "Random Forest"  )
+    plt.errorbar(formatted_dates1,xgb1, yerr=np.array([np.abs(xgb1 - plotdata['XGB_upper']), xgb1 - plotdata['XGB_lower']]), 
+                 color ='orange',linestyle='none', marker='x', label = "XGBoost" )
+    plt.errorbar(formatted_dates,LR1, yerr=np.array([np.abs(LR1 - plotdata['LR_upper']), LR1 - plotdata['LR_lower']]), 
+                 color ='green', linestyle='none', marker='v', label = "Logistic Regression" )
+    plt.errorbar(formatted_dates2,LRADA1, yerr=np.array([np.abs(LRADA1 - plotdata['LRADA_upper']),
+                                                         LRADA1 - plotdata['LRADA_lower']]), 
+                color ='red', linestyle='none', marker='o', label = "Logistic Regression ADASYN" )
+    plt.ylim(0, 1)
+    plt.xticks(rotation=45)
+    plt.xlabel('Date')
+    plt.ylabel('Value')
     plt.legend(loc = 'lower right')
     plt.grid(which = "major", linewidth = 1)
     plt.grid(which = "minor", linewidth = 0.3)
